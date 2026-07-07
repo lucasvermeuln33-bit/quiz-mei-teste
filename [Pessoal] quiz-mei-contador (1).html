@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Você precisa de um contador? · Quiz MEI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F2EA;
+    --card:#FFFDF8;
+    --ink:#17293B;
+    --emerald:#157A5B;
+    --emerald-dark:#0F5B43;
+    --amber:#E39A2E;
+    --clay:#C0503A;
+    --wa:#25D366;
+    --wa-dark:#1EA854;
+    --muted:#7C7566;
+    --line:#E7E0CF;
+    --shadow:0 18px 50px -22px rgba(23,41,59,.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Inter",system-ui,sans-serif;
+    background:
+      radial-gradient(1100px 600px at 50% -10%, #FBF8F0 0%, transparent 60%),
+      var(--paper);
+    color:var(--ink);
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 18px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%;max-width:560px}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:34px 30px 30px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:5px;
+    background:linear-gradient(90deg,var(--emerald),var(--amber));
+  }
+
+  .eyebrow{
+    font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--emerald);display:flex;align-items:center;gap:8px;margin-bottom:16px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+
+  h1{
+    font-family:"Fraunces",serif;font-weight:600;font-size:30px;line-height:1.12;
+    letter-spacing:-.01em;margin-bottom:12px;
+  }
+  .lead{color:var(--muted);font-size:15.5px;margin-bottom:26px}
+
+  /* progress */
+  .progress{display:flex;gap:6px;margin-bottom:24px}
+  .seg{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .seg > i{display:block;height:100%;width:0;background:var(--emerald);
+           border-radius:99px;transition:width .35s ease}
+  .seg.done > i{width:100%}
+
+  .qcount{font-size:12.5px;font-weight:600;color:var(--muted);
+          letter-spacing:.02em;margin-bottom:10px}
+  .question{
+    font-family:"Fraunces",serif;font-weight:600;font-size:23px;line-height:1.22;
+    letter-spacing:-.01em;margin-bottom:6px;
+  }
+  .qhint{font-size:13.5px;color:var(--muted);margin-bottom:22px}
+
+  .options{display:flex;flex-direction:column;gap:12px}
+  .opt{
+    font-family:inherit;text-align:left;cursor:pointer;
+    background:#FBF9F3;border:1.5px solid var(--line);border-radius:14px;
+    padding:16px 18px;font-size:15.5px;font-weight:600;color:var(--ink);
+    display:flex;align-items:center;gap:14px;
+    transition:border-color .16s ease,background .16s ease,transform .1s ease;
+  }
+  .opt:hover{border-color:var(--emerald);background:#F3F8F5}
+  .opt:active{transform:scale(.99)}
+  .opt:focus-visible{outline:3px solid rgba(21,122,91,.35);outline-offset:2px}
+  .opt .mark{
+    width:26px;height:26px;border-radius:50%;flex:none;
+    border:1.5px solid var(--line);display:grid;place-items:center;
+    font-size:13px;color:var(--muted);font-weight:700;transition:.16s;
+  }
+  .opt:hover .mark{border-color:var(--emerald);color:var(--emerald)}
+
+  .backrow{margin-top:22px}
+  .back{
+    background:none;border:none;font-family:inherit;font-size:13.5px;
+    font-weight:600;color:var(--muted);cursor:pointer;padding:4px 0;
+  }
+  .back:hover{color:var(--ink)}
+  .back:disabled{opacity:0;pointer-events:none}
+
+  .cta{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;border:none;cursor:pointer;font-family:inherit;font-weight:700;
+    font-size:16px;padding:16px 20px;border-radius:14px;color:#fff;
+    transition:transform .1s ease,filter .16s ease;text-decoration:none;
+  }
+  .cta:active{transform:scale(.99)}
+  .cta.start{background:var(--emerald)}
+  .cta.start:hover{filter:brightness(1.06)}
+  .cta.wa{background:var(--wa);box-shadow:0 12px 26px -12px rgba(37,211,102,.8)}
+  .cta.wa:hover{background:var(--wa-dark)}
+
+  .meta{display:flex;gap:22px;margin-top:22px;flex-wrap:wrap}
+  .meta div{font-size:12.5px;color:var(--muted)}
+  .meta b{display:block;font-family:"Fraunces",serif;font-size:19px;
+          color:var(--ink);font-weight:600}
+
+  /* ---- result ---- */
+  .verdict-tag{
+    display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;padding:7px 12px;border-radius:99px;
+    margin-bottom:16px;
+  }
+  .tag-alert{background:#FBECE7;color:var(--clay)}
+  .tag-ok{background:#E7F3EE;color:var(--emerald-dark)}
+
+  /* gauge */
+  .gauge{margin:8px 0 4px}
+  .gauge-track{
+    position:relative;height:14px;border-radius:99px;
+    background:linear-gradient(90deg,var(--emerald) 0%,#7BB86A 30%,var(--amber) 60%,var(--clay) 100%);
+    opacity:.9;
+  }
+  .gauge-mark{
+    position:absolute;top:50%;left:0;width:22px;height:22px;border-radius:50%;
+    background:#fff;border:3px solid var(--ink);transform:translate(-50%,-50%);
+    box-shadow:0 4px 12px rgba(23,41,59,.3);left:0;transition:left .9s cubic-bezier(.2,.8,.2,1);
+  }
+  .gauge-labels{display:flex;justify-content:space-between;margin-top:10px;
+                font-size:11.5px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+
+  .reasons{list-style:none;margin:22px 0 4px;display:flex;flex-direction:column;gap:10px}
+  .reasons li{display:flex;gap:11px;font-size:14.5px;align-items:flex-start}
+  .reasons .ic{flex:none;width:20px;height:20px;border-radius:6px;display:grid;
+               place-items:center;font-size:12px;font-weight:700;margin-top:1px}
+  .ic-warn{background:#FBECE7;color:var(--clay)}
+  .ic-ok{background:#E7F3EE;color:var(--emerald-dark)}
+
+  .disclaimer{
+    margin:22px 0 20px;padding:16px 18px;border-radius:14px;
+    background:#FBECE7;border:1px solid #F0D3C9;color:#7A3324;
+    font-size:14px;display:flex;gap:12px;
+  }
+  .disclaimer b{color:var(--clay)}
+  .disclaimer .bang{font-size:18px;line-height:1.4}
+
+  .note-ok{
+    margin:22px 0 18px;padding:16px 18px;border-radius:14px;
+    background:#EEF5F0;border:1px solid #D8E9DF;color:#2C5344;font-size:14px;
+  }
+
+  .restart{
+    display:block;width:100%;text-align:center;background:none;border:none;
+    font-family:inherit;font-size:13.5px;font-weight:600;color:var(--muted);
+    cursor:pointer;margin-top:16px;padding:6px;
+  }
+  .restart:hover{color:var(--ink)}
+  .secondary-link{display:inline-block;margin-top:14px;font-size:13.5px;
+                  font-weight:600;color:var(--emerald);text-decoration:none}
+  .secondary-link:hover{text-decoration:underline}
+
+  .foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:18px}
+
+  .screen{animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .hidden{display:none}
+
+  @media (max-width:480px){
+    .card{padding:28px 22px 24px}
+    h1{font-size:26px}
+    .question{font-size:21px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <!-- INTRO -->
+      <section id="intro" class="screen">
+        <div class="eyebrow"><span class="dot"></span> Quiz MEI · 5 perguntas</div>
+        <h1>Você, MEI, precisa de um contador?</h1>
+        <p class="lead">Responda 5 perguntas rápidas sobre o seu negócio. No final você descobre se dá pra tocar sozinho por enquanto — ou se é hora de chamar um contador.</p>
+        <button class="cta start" onclick="start()">Começar o quiz →</button>
+        <div class="meta">
+          <div><b>5</b> perguntas</div>
+          <div><b>~1 min</b> pra responder</div>
+          <div><b>0</b> cadastro necessário</div>
+        </div>
+      </section>
+
+      <!-- QUESTION -->
+      <section id="quiz" class="screen hidden">
+        <div class="progress" id="progress"></div>
+        <div class="qcount" id="qcount"></div>
+        <div class="question" id="question"></div>
+        <div class="qhint" id="qhint"></div>
+        <div class="options" id="options"></div>
+        <div class="backrow">
+          <button class="back" id="backBtn" onclick="goBack()">← Voltar</button>
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section id="result" class="screen hidden"></section>
+
+    </div>
+    <p class="foot">Este quiz é uma orientação inicial e não substitui a avaliação de um contador.</p>
+  </div>
+
+<script>
+  const WHATSAPP = "5527981001286";
+  const WA_MSG = encodeURIComponent(
+    "Olá! Fiz o quiz sobre MEI e gostaria de falar com um contador sobre a minha situação."
+  );
+  const waLink = `https://wa.me/${WHATSAPP}?text=${WA_MSG}`;
+
+  // Cada resposta soma pontos. Quanto maior a pontuação, mais o MEI precisa de contador.
+  // "why" é o motivo mostrado no resultado quando a resposta indica risco.
+  const QUESTIONS = [
+    {
+      q: "Seu faturamento já passou (ou está perto de passar) de R$ 81.000 nos últimos 12 meses?",
+      hint: "Esse é o limite do MEI. Passar dele sem ajustar pode te tirar do regime.",
+      answers: [
+        { label: "Sim, estou perto ou já passei", points: 2,
+          why: "Você está perto do limite de R$ 81 mil — há risco de desenquadramento do MEI." },
+        { label: "Não, estou bem abaixo", points: 0 }
+      ]
+    },
+    {
+      q: "Você já tem um funcionário registrado ou pretende contratar em breve?",
+      hint: "MEI pode ter 1 funcionário — mas isso gera folha, FGTS e obrigações mensais.",
+      answers: [
+        { label: "Sim, tenho ou vou contratar", points: 1,
+          why: "Ter funcionário gera folha de pagamento e encargos que pedem acompanhamento." },
+        { label: "Não, trabalho sozinho(a)", points: 0 }
+      ]
+    },
+    {
+      q: "Você está em dia com o DAS mensal e já entregou a Declaração Anual (DASN-SIMEI)?",
+      hint: "O DAS é o boleto mensal; a DASN-SIMEI é a declaração anual obrigatória.",
+      answers: [
+        { label: "Sim, está tudo em dia", points: 0 },
+        { label: "Não / não tenho certeza", points: 2,
+          why: "Atraso em DAS ou na declaração anual pode gerar multa e até cancelar seu MEI." }
+      ]
+    },
+    {
+      q: "Você tem dúvidas na hora de emitir notas fiscais ou de controlar o que entra e sai?",
+      hint: "Emissão de NF e controle de receitas/despesas costumam confundir bastante.",
+      answers: [
+        { label: "Sim, isso me confunde", points: 1,
+          why: "Dúvidas com notas e controle financeiro são onde o contador mais evita dor de cabeça." },
+        { label: "Não, domino isso bem", points: 0 }
+      ]
+    },
+    {
+      q: "Você pretende crescer, abrir outra atividade ou virar Microempresa (ME) em breve?",
+      hint: "Crescer é ótimo — mas mudar de regime tem passos que erram fácil sozinho.",
+      answers: [
+        { label: "Sim, quero crescer / mudar", points: 2,
+          why: "Planejar crescimento ou virar ME envolve escolhas de tributação que pedem um contador." },
+        { label: "Não, quero seguir como MEI", points: 0 }
+      ]
+    }
+  ];
+
+  const MAX = QUESTIONS.reduce((s,x)=>s+Math.max(...x.answers.map(a=>a.points)),0); // = 8
+  const THRESHOLD = 2; // 2+ pontos => recomenda contador
+
+  let current = 0;
+  let answers = new Array(QUESTIONS.length).fill(null);
+
+  function start(){
+    current = 0;
+    answers = new Array(QUESTIONS.length).fill(null);
+    show("quiz");
+    buildProgress();
+    render();
+  }
+
+  function show(id){
+    ["intro","quiz","result"].forEach(s=>{
+      document.getElementById(s).classList.toggle("hidden", s!==id);
+    });
+  }
+
+  function buildProgress(){
+    const p = document.getElementById("progress");
+    p.innerHTML = QUESTIONS.map(()=>'<span class="seg"><i></i></span>').join("");
+  }
+
+  function updateProgress(){
+    document.querySelectorAll("#progress .seg").forEach((el,i)=>{
+      el.classList.toggle("done", answers[i]!==null);
+    });
+  }
+
+  function render(){
+    const item = QUESTIONS[current];
+    document.getElementById("qcount").textContent = `Pergunta ${current+1} de ${QUESTIONS.length}`;
+    document.getElementById("question").textContent = item.q;
+    document.getElementById("qhint").textContent = item.hint;
+
+    const opts = document.getElementById("options");
+    opts.innerHTML = "";
+    item.answers.forEach((a,i)=>{
+      const btn = document.createElement("button");
+      btn.className = "opt";
+      btn.innerHTML = `<span class="mark">${i===0?"A":"B"}</span><span>${a.label}</span>`;
+      btn.onclick = ()=>choose(i);
+      opts.appendChild(btn);
+    });
+
+    document.getElementById("backBtn").disabled = current===0;
+    updateProgress();
+  }
+
+  function choose(i){
+    answers[current] = i;
+    updateProgress();
+    if(current < QUESTIONS.length-1){
+      current++;
+      // re-trigger fade animation
+      const q = document.getElementById("quiz");
+      q.classList.remove("screen"); void q.offsetWidth; q.classList.add("screen");
+      render();
+    } else {
+      finish();
+    }
+  }
+
+  function goBack(){
+    if(current>0){ current--; render(); }
+  }
+
+  function finish(){
+    let score = 0;
+    const risks = [];
+    answers.forEach((ansIdx,qIdx)=>{
+      const a = QUESTIONS[qIdx].answers[ansIdx];
+      score += a.points;
+      if(a.points>0 && a.why) risks.push(a.why);
+    });
+
+    const needs = score >= THRESHOLD;
+    const pct = Math.round((score/MAX)*100);
+    const markPos = Math.max(6, Math.min(94, pct)); // mantém o marcador visível nas bordas
+
+    const res = document.getElementById("result");
+    if(needs){
+      res.innerHTML = `
+        <span class="verdict-tag tag-alert">⚠ Recomendado</span>
+        <h1>Sim — procure um contador o quanto antes.</h1>
+        <p class="lead">Pelas suas respostas, seu MEI tem pontos que pedem um olhar profissional. Um contador te protege de multas e ajuda o negócio a crescer certo.</p>
+        <div class="gauge">
+          <div class="gauge-track"><div class="gauge-mark" id="mark"></div></div>
+          <div class="gauge-labels"><span>Tranquilo</span><span>Atenção</span><span>Procure ajuda</span></div>
+        </div>
+        <ul class="reasons">${risks.map(r=>`
+          <li><span class="ic ic-warn">!</span><span>${r}</span></li>`).join("")}
+        </ul>
+        <div class="disclaimer">
+          <span class="bang">⚠️</span>
+          <span><b>Não deixe pra depois.</b> Ficar irregular pode gerar multa, cobrança de impostos atrasados ou até o cancelamento do seu MEI. Fale com um contador agora e resolva com segurança.</span>
+        </div>
+        <a class="cta wa" href="${waLink}" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.11.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.77-1.85-.2-.48-.4-.42-.56-.43-.14-.01-.31-.01-.48-.01a.92.92 0 0 0-.67.31c-.23.25-.88.86-.88 2.1 0 1.24.9 2.43 1.03 2.6.12.17 1.77 2.71 4.3 3.8.6.26 1.07.42 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28Z"/></svg>
+          Falar com um contador no WhatsApp
+        </a>
+        <button class="restart" onclick="start()">↺ Refazer o quiz</button>
+      `;
+    } else {
+      res.innerHTML = `
+        <span class="verdict-tag tag-ok">✓ Tudo sob controle</span>
+        <h1>Por enquanto, você consegue tocar sozinho(a).</h1>
+        <p class="lead">Seu MEI parece organizado e dentro dos limites. Um contador ainda não é obrigatório agora — mas vale ficar de olho conforme o negócio muda.</p>
+        <div class="gauge">
+          <div class="gauge-track"><div class="gauge-mark" id="mark"></div></div>
+          <div class="gauge-labels"><span>Tranquilo</span><span>Atenção</span><span>Procure ajuda</span></div>
+        </div>
+        <ul class="reasons">
+          <li><span class="ic ic-ok">✓</span><span>Mantenha o DAS pago todo mês e a DASN-SIMEI entregue até maio.</span></li>
+          <li><span class="ic ic-ok">✓</span><span>Acompanhe seu faturamento pra não estourar os R$ 81 mil no ano.</span></li>
+          <li><span class="ic ic-ok">✓</span><span>Se for contratar, crescer ou virar ME, aí sim chame um contador.</span></li>
+        </ul>
+        <div class="note-ok">
+          Ficou com alguma dúvida específica? Um contador pode fazer uma revisão rápida pra te deixar 100% tranquilo(a).
+        </div>
+        <a class="secondary-link" href="${waLink}" target="_blank" rel="noopener">Tirar uma dúvida no WhatsApp →</a>
+        <button class="restart" onclick="start()">↺ Refazer o quiz</button>
+      `;
+    }
+
+    show("result");
+    // anima o marcador do medidor após render
+    requestAnimationFrame(()=>{
+      const m = document.getElementById("mark");
+      if(m) m.style.left = markPos + "%";
+    });
+  }
+</script>
+</body>
+</html>
